@@ -252,7 +252,7 @@ plt.plot([k/nu for k in visco_k_star],y_plus_k_star, label="Star-CCM+ "+r"$K-\ep
 plt.plot([kappa*y/l_et for y in y_effectif],yplus,label="Longueur de mélange")
 plt.legend()
 plt.ylabel("y+")
-plt.xlabel("Viscosité turbulente (m²/s)")
+plt.xlabel("Viscosité turbulente")
 plt.loglog()
 plt.grid(which='both')
 
@@ -280,12 +280,17 @@ plt.legend()
 y_plus_k_fluent = [y/(1.92*10**(-5)) for y in y_k_fluent]
 y_plus_k_star = [y/(1.92*10**(-5)) for y in y_k_star]
 
-#plt.figure(7)
-#plt.plot(visco_k_fluent,y_plus_k_fluent, label="Fluent "+r"$K-\epsilon$")
-#plt.plot(visco_k_star,y_plus_k_star, label="Star-CCM+ "+r"$K-\epsilon$")
-#plt.plot(visc_dissip,yplus,label="DNS")
-#plt.ylabel("y+")
-#plt.xlabel("Viscosité turbulente (m²/s)")
-#plt.legend()
+nrj_tub_fluent,y_k_fluent = read_xy("nrj_cin_turb.xy")
+nrj_tub_star,y_k_star = read_csv("turbulent_kinetic_energy.csv", 2)
+
+plt.figure(7)
+plt.plot([k/(u_et*u_et) for k in nrj_tub_fluent],y_plus_k_fluent, label="Fluent "+r"$K-\epsilon$")
+plt.plot([k/(u_et*u_et) for k in nrj_tub_star],y_plus_k_star, label="Star-CCM+ "+r"$K-\epsilon$")
+plt.plot(k,yplus,label="DNS")
+plt.legend()
+plt.ylabel("y+")
+plt.xlabel("Energie cinétique turbulente")
+plt.loglog()
+plt.grid(which='both')
 
 plt.show()

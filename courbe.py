@@ -10,11 +10,19 @@ def u_moy_long_mel(u_et,l_et,y,h,Re_et):
 def visco_turb_mel(y, du_dy):
     return kappa*kappa*y*y*du_dy
 
+def du_dy_mel(y):
+    return np.sqrt(tau0)/(kappa*y)
+
+def uxuy(y,du_dy):
+    return -kappa*kappa*y*y*du_dy
+
 # Variables
 
 kappa = 0.384
 l_et = 1.92*10**(-5)
 u_et = 0.78
+tau0 = 0.75 
+nu = 15*10**(-6)
 
 ### Lecture des fichiers csv et xy
 
@@ -231,9 +239,23 @@ y_plus_k_star = [y/(1.92*10**(-5)) for y in y_k_star]
 #plt.grid(which='both')
 
 # Viscosité turbulente 
+uxuymel = [-(kappa*kappa*y*y*du_dy_mel(y)) for y in yplus]
+dudymel = [du_dy_mel(y) for y in yplus]
 
 visco_k_fluent,y_k_fluent = read_xy("visc_turb.xy")
 visco_k_star,y_k_star = read_csv("turbulent_viscosity.csv", 2)
+
+
+plt.figure(10)
+plt.plot([k/nu for k in visco_k_fluent],y_plus_k_fluent, label="Fluent "+r"$K-\epsilon$")
+plt.plot([k/nu for k in visco_k_star],y_plus_k_star, label="Star-CCM+ "+r"$K-\epsilon$")
+plt.plot([kappa*y/l_et for y in y_effectif],yplus,label="Longueur de mélange")
+plt.legend()
+plt.ylabel("y+")
+plt.xlabel("Viscosité turbulente (m²/s)")
+plt.loglog()
+plt.grid(which='both')
+
 
 # Dissipation et production d'énergie cinétique turbulente
 
@@ -242,17 +264,28 @@ dissip_k_star,y_k_star = read_csv("turbulent_dissipation_rate.csv", 2)
 
 prod_k_fluent,y_k_fluent = read_xy("taux_production.xy")
 
+# Production
+
+plt.figure(6)
+plt.plot(prod_k_fluent,y_plus_k_fluent, label="Fluent "+r"$K-\epsilon$")
+plt.plot([k*l_et/(u_et*u_et) for k in prod],yplus,label="DNS")
+plt.plot([uxuymel[k]*dudymel[k] for k in range(len(uxuymel))],yplus,label="Longueur de mélange")
+plt.ylabel("y+")
+plt.xlabel("Production")
+plt.loglog()
+plt.legend()
+
 # Energie cinétique turbulente avec y+
 
 y_plus_k_fluent = [y/(1.92*10**(-5)) for y in y_k_fluent]
 y_plus_k_star = [y/(1.92*10**(-5)) for y in y_k_star]
 
-plt.figure(7)
-plt.plot(visco_k_fluent,y_plus_k_fluent, label="Fluent "+r"$K-\epsilon$")
-plt.plot(visco_k_star,y_plus_k_star, label="Star-CCM+ "+r"$K-\epsilon$")
-plt.plot(visc_dissip,yplus,label="DNS")
-plt.ylabel("y+")
-plt.xlabel("Viscosité turbulente (m²/s)")
-plt.legend()
+#plt.figure(7)
+#plt.plot(visco_k_fluent,y_plus_k_fluent, label="Fluent "+r"$K-\epsilon$")
+#plt.plot(visco_k_star,y_plus_k_star, label="Star-CCM+ "+r"$K-\epsilon$")
+#plt.plot(visc_dissip,yplus,label="DNS")
+#plt.ylabel("y+")
+#plt.xlabel("Viscosité turbulente (m²/s)")
+#plt.legend()
 
 plt.show()
